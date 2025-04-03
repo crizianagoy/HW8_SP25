@@ -44,11 +44,11 @@ class Pump_Controller():
         :param data: 
         :return: 
         """
-        self.Model.PumpName = #JES Missing Code
+        self.Model.PumpName = data[0].strip()
         #data[1] is the units line
         L=data[2].split()
-        self.Model.FlowUnits = #JES Missing Code
-        self.Model.HeadUnits = #JES Missing Code
+        self.Model.FlowUnits = L[0]
+        self.Model.HeadUnits = L[1]
 
         # extracts flow, head and efficiency data and calculates coefficients
         self.SetData(data[3:])
@@ -68,10 +68,10 @@ class Pump_Controller():
 
         #parse new data
         for L in data:
-            Cells=#JES Missing Code #parse the line into an array of strings
-            self.Model.FlowData=np.append(self.Model.FlowData, #JES Missing Code) #remove any spaces and convert string to a float
-            self.Model.HeadData=np.append(self.Model.HeadData, #JES Missing Code) #remove any spaces and convert string to a float
-            self.Model.EffData=np.append(self.Model.EffData, #JES Missing Code) #remove any spaces and convert string to a float
+            Cells=L.strip().split() #parse the line into an array of strings
+            self.Model.FlowData=np.append(self.Model.FlowData, float(Cells[0])) #remove any spaces and convert string to a float
+            self.Model.HeadData=np.append(self.Model.HeadData, float(Cells[1])) #remove any spaces and convert string to a float
+            self.Model.EffData=np.append(self.Model.EffData, float(Cells[2])) #remove any spaces and convert string to a float
 
         #call least square fit for head and efficiency
         self.LSFit()
@@ -130,7 +130,21 @@ class Pump_View():
         effx, effy, effRSq = Model.LSFitEff.GetPlotInfo(3, npoints=500)
 
         axes = self.ax
-        #JES Missing code (many lines to make the graph)
+        axes.clear()
+
+        # Plot Head Curve
+        axes.plot(Model.FlowData, Model.HeadData, 'bo', label='Head Data')
+        axes.plot(headx, heady, 'b-', label=f'Head Fit (R²={headRSq:.3f})')
+
+        # Plot Efficiency Curve
+        axes.plot(Model.FlowData, Model.EffData, 'go', label='Efficiency Data')
+        axes.plot(effx, effy, 'g-', label=f'Efficiency Fit (R²={effRSq:.3f})')
+
+        axes.set_title(f"Pump Curve: {Model.PumpName}")
+        axes.set_xlabel(f"Flow ({Model.FlowUnits})")
+        axes.set_ylabel(f"Head / Efficiency ({Model.HeadUnits}, -)")
+        axes.grid(True)
+        axes.legend()
 
         self.canvas.draw()
 

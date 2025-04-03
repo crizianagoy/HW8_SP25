@@ -103,6 +103,16 @@ class MainWindow(qtw.QWidget, Ui_Form):
 
     def setNewPLow(self):
         self.RC.setNewPLow()
+def setTurbineInletToSaturationTemp(self):
+    try:
+        P_high = float(self.view.LE_PHigh.text())
+        if self.model.using_SI:
+            Tsat = self.model.steamTable.tsat_p(P_high)
+        else:
+            Tsat = self.model.to_english_temp(self.model.steamTable.tsat_p(self.model.from_english_press(P_high)))
+        self.view.LE_TurbineInlet.setText(f"{Tsat:.2f}")
+    except:
+        pass  # handle invalid input gracefully
 
 #endregion
 
